@@ -7,3 +7,21 @@ Unsplash 'api':
 ```
 Invoke-RestMethod -Uri "https://source.unsplash.com/random/900x900" -OutFile test.jpg
 ```
+
+Functionality.
+
+Clean (blablsa) regex:
+```
+\W\(.+\)
+```
+
+Clean "list of":
+```
+.
+```
+
+Title Caps.
+
+Regenerate if to long.
+
+Decition, Are you pleased with the name? Say N to regenerate.
