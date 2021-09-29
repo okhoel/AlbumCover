@@ -10,12 +10,12 @@ Invoke-RestMethod -Uri "https://source.unsplash.com/random/900x900" -OutFile tes
 
 Functionality.
 
-Clean (blablsa) regex:
+Clean (blablsa) and "list of" regex:
 ```
-\W\(.+\)
+List\Wof\W|\W\(.+\)
 ```
 
-Clean "list of":
+
 ```
 .
 ```
