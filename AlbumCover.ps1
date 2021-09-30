@@ -35,10 +35,60 @@ function Show-Image {
       $form.ShowDialog()
     }
     Start-Job $ScriptBlock -Name "pictureViewer" -ArgumentList $path, $title
-  }
+}
 
 
+function Write-HostCenter {
+    param($Message)
+    Write-Host ("{0}{1}" -f (' ' * (([Math]::Max(0, $Host.UI.RawUI.BufferSize.Width / 2) - [Math]::Floor($Message.Length / 2)))), $Message)
+}
 
+<#
+.SYNOPSIS
+    Short description
+.DESCRIPTION
+    Long description
+.EXAMPLE
+    Example of how to use this cmdlet
+.EXAMPLE
+    Another example of how to use this cmdlet
+#>
+function Write-TextOnImage {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true)][string]$ImagePath,
+        [Parameter(Mandatory=$true)][string]$Text
+    )
+    
+    begin {
+        $White = New-Object ImageMagick.MagickColor("#fff")
+        $Black = New-Object ImageMagick.MagickColor("#000")
+        $Transparent = New-Object ImageMagick.MagickColor("Transparent")
+
+        $Setting = New-Object ImageMagick.MagickReadSettings
+
+        $Setting.TextGravity = "Center"
+        $Setting.FillColor = $White
+        $Setting.StrokeColor = $Black
+        $Setting.BackgroundColor = $Transparent
+        $Setting.Width = 900
+        $Setting.Height = 120
+        $Setting.Font = 'Arial'
+    }
+    
+    process {
+        $Art = New-Object ImageMagick.MagickImage($ImagePath)
+        $caption = New-Object ImageMagick.MagickImage("caption:$Text", $Setting)
+
+        $Art.Composite($caption, 0, 0, [ImageMagick.CompositeOperator]::Over)
+        #  [ImageMagick.CompositeOperator]::Screen
+        #
+        $Art
+    }
+    
+    end {
+    }
+}
 
 if ($PSVersionTable.PSEdition -ne 'Core') {
     Write-Host "This script should be run from PWSH (Powershell Core)."
@@ -48,10 +98,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     $unsplashUri = "https://source.unsplash.com/random/900x900"
 
 
-    function Write-HostCenter {
-        param($Message)
-        Write-Host ("{0}{1}" -f (' ' * (([Math]::Max(0, $Host.UI.RawUI.BufferSize.Width / 2) - [Math]::Floor($Message.Length / 2)))), $Message)
-    }
+
+
     Write-Host "`n`n"
     Write-HostCenter "----------------------------"
     Write-HostCenter "👨‍🎤 Random Album Cover Generator 👩‍🎤"
@@ -63,6 +111,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     $bandName = $wikiRes.Title
     $bandName
 
+    # Clean or regenerate Band name here.
+
     $ArtFile = New-TemporaryFile
     Write-Host "Downloading cover art..."
     #$ProgressPreference = 'SilentlyContinue'    
@@ -70,14 +120,10 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     #$ProgressPreference = 'Continue'
 
     # Magic
-    $White = New-Object ImageMagick.MagickColor("#fff")
-    $Black = New-Object ImageMagick.MagickColor("#000")
+    $ArtWithText = Write-TextOnImage -ImagePath $ArtFile.Fullname -Text $bandName
+    $ArtWithText.Write("c:\temp\art.png")
+    & "c:\temp\art.png"
 
-    $Setting = New-Object ImageMagick.MagickReadSettings
-
-    $imageShowJob = Show-Image -Path $ArtFile.Fullname -title $bandName
+    #$imageShowJob = Show-Image -Path $ArtFile.Fullname -title $bandName
 
 }
-
-
-
