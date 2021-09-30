@@ -22,6 +22,8 @@ List\Wof\W|\W\(.+\)
 
 Title Caps.
 
-Regenerate if to long.
+# Regenerate
+- if to long.
+- if containing "Olympics"
 
 Decition, Are you pleased with the name? Say N to regenerate.
