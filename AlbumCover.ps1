@@ -142,20 +142,28 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
     # Add text to coverart
     $ArtWithText = Write-TextOnImage -ImagePath $ArtFile.Fullname -Text $bandName
+    # Extend (transparent frame):
+    $Transparent = New-Object ImageMagick.MagickColor("Transparent")
+    $ArtWithText.Extent(1000,1000, [ImageMagick.Gravity]::Center, $Transparent)
 
     # Add clean cover to canvas
-    $Canvas.Composite($ArtWithText, 50, 50, [ImageMagick.CompositeOperator]::Over)
+    #$Canvas.Composite($ArtWithText, 50, 50, [ImageMagick.CompositeOperator]::Over)
 
     # Load and Add effects
     $Wrinkles = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/OldCover.png")
-    $Canvas.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
+    #$Canvas.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
+    $ArtWithText.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
 
     # Add mask
-    $Mask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Mask.png")
-    $Canvas.Composite($Mask, 50, 40, [ImageMagick.CompositeOperator]::Over)
+    #$Mask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Mask.png")
+    $IMask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/InverseMask.png")
+    #$Canvas.Composite($Mask, 50, 40, [ImageMagick.CompositeOperator]::Over)
+    #$ArtWithText.Composite($Mask, 50, 40, [ImageMagick.CompositeOperator]::Over)
+    $ArtWithText.Composite($IMask, 50, 40, [ImageMagick.CompositeOperator]::CopyAlpha)
 
-    $Canvas.Write("c:\temp\art.png")
-    & "c:\temp\art.png"
+    #$Canvas.Write("c:\temp\art.png")
+    $ArtWithText.Write("c:\temp\art.png")
+    Show-Image -Path "c:\temp\art.png" -Title $BandName
 
     #$imageShowJob = Show-Image -Path $ArtFile.Fullname -title $bandName
 
