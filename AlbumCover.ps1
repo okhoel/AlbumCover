@@ -110,7 +110,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     
     $wikiRes = Invoke-RestMethod -uri $wikiUri
     $bandName = $wikiRes.Title
-    $bandName
+    $bandName  = $bandName  -replace "List\Wof\W|\W\(.+\)",""
 
     # Clean or regenerate Band name here.
 
