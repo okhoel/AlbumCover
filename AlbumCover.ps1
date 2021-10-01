@@ -110,9 +110,23 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     
     $wikiRes = Invoke-RestMethod -uri $wikiUri
     $bandName = $wikiRes.Title
-    $bandName  = $bandName  -replace "List\Wof\W|\W\(.+\)",""
 
+    if ($bandName -match "olympics") {
+        # So many "olympics" titles. And they doesn't make good band names.
+        $wikiRes = Invoke-RestMethod -uri $wikiUri
+        $bandName = $wikiRes.Title
+    }
+
+    # Convert long names to 3 word names:
+    if ($bandName.Length -gt 30) {
+        $bandName = ($bandName -split " ")[0..2] -join ' '
+    }
+
+ 
     # Clean or regenerate Band name here.
+    $bandName  = $bandName  -replace "List\Wof\W|\W\(.+\)",""
+    
+    Write-Host "Assigned band name: $bandName"
 
 
     $ArtFile = New-TemporaryFile
