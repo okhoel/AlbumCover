@@ -73,7 +73,7 @@ function Write-TextOnImage {
         $Setting.BackgroundColor = $Transparent
         $Setting.Width = 880
         $Setting.Height = 120
-        $Setting.Font = 'Arial','Impact'|Get-Random
+        $Setting.Font = 'Arial', 'Arial Black', 'Impact' | Get-Random
     }
     
     process {
