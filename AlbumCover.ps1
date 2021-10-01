@@ -71,16 +71,16 @@ function Write-TextOnImage {
         $Setting.FillColor = $White
         $Setting.StrokeColor = $Black
         $Setting.BackgroundColor = $Transparent
-        $Setting.Width = 900
+        $Setting.Width = 880
         $Setting.Height = 120
-        $Setting.Font = 'Arial'
+        $Setting.Font = 'Arial','Impact'|Get-Random
     }
     
     process {
         $Art = New-Object ImageMagick.MagickImage($ImagePath)
         $caption = New-Object ImageMagick.MagickImage("caption:$Text", $Setting)
 
-        $Art.Composite($caption, 0, 0, [ImageMagick.CompositeOperator]::Over)
+        $Art.Composite($caption, 10, 20, [ImageMagick.CompositeOperator]::Over)
         #  [ImageMagick.CompositeOperator]::Screen
         #
         $Art
@@ -89,6 +89,7 @@ function Write-TextOnImage {
     end {
     }
 }
+
 
 if ($PSVersionTable.PSEdition -ne 'Core') {
     Write-Host "This script should be run from PWSH (Powershell Core)."
