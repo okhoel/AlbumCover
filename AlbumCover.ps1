@@ -114,6 +114,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
     # Clean or regenerate Band name here.
 
+
     $ArtFile = New-TemporaryFile
     Write-Host "Downloading cover art..."
     #$ProgressPreference = 'SilentlyContinue'    
@@ -121,8 +122,25 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     #$ProgressPreference = 'Continue'
 
     # Magic
+    # Create Canvas
+    $Canvas = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Canvas.png")
+
+
+    # Add text to coverart
     $ArtWithText = Write-TextOnImage -ImagePath $ArtFile.Fullname -Text $bandName
-    $ArtWithText.Write("c:\temp\art.png")
+
+    # Add clean cover to canvas
+    $Canvas.Composite($ArtWithText, 50, 50, [ImageMagick.CompositeOperator]::Over)
+
+    # Load and Add effects
+    $Wrinkles = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/OldCover.png")
+    $Canvas.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
+
+    # Add mask
+    $Mask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Mask.png")
+    $Canvas.Composite($Mask, 50, 40, [ImageMagick.CompositeOperator]::Over)
+
+    $Canvas.Write("c:\temp\art.png")
     & "c:\temp\art.png"
 
     #$imageShowJob = Show-Image -Path $ArtFile.Fullname -title $bandName
