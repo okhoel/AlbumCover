@@ -61,14 +61,15 @@ function Write-TextOnImage {
     )
     
     begin {
-        $White = New-Object ImageMagick.MagickColor("#fff")
+        $hex = "#ebe9e4", "#9bbdc7", "#ccc6cf" | get-random
+        $Fill = New-Object ImageMagick.MagickColor($hex)
         $Black = New-Object ImageMagick.MagickColor("#000")
         $Transparent = New-Object ImageMagick.MagickColor("Transparent")
 
         $Setting = New-Object ImageMagick.MagickReadSettings
 
         $Setting.TextGravity = "Center"
-        $Setting.FillColor = $White
+        $Setting.FillColor = $Fill
         $Setting.StrokeColor = $Black
         $Setting.BackgroundColor = $Transparent
         $Setting.Width = 880
@@ -146,24 +147,39 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     $Transparent = New-Object ImageMagick.MagickColor("Transparent")
     $ArtWithText.Extent(1000,1000, [ImageMagick.Gravity]::Center, $Transparent)
 
-    # Add clean cover to canvas
-    #$Canvas.Composite($ArtWithText, 50, 50, [ImageMagick.CompositeOperator]::Over)
-
     # Load and Add effects
     $Wrinkles = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/OldCover.png")
-    #$Canvas.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
     $ArtWithText.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
 
+    # Add Stickers
+    $stickerPath = (Get-Childitem "$PSScriptRoot/Assets/Sticker_*" | Get-Random).Fullname
+    $sticker = New-Object ImageMagick.MagickImage($stickerPath)
+    $sticker.BackgroundColor = $Transparent
+    $sticker.Rotate((Get-Random -Minimum -10 -Maximum 10))
+
+    # Sticker position
+    $stickerX = Get-Random -Minimum 780 -Maximum 820
+    $StickerY = (Get-Random -Minimum 100 -Maximum 190), (Get-Random -Minimum 760 -Maximum 820) | Get-Random
+    # Place sticker
+    $ArtWithText.Composite($sticker, $stickerX, $StickerY, [ImageMagick.CompositeOperator]::Over)
+
+    $ParenalAdvisorySticker = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/ParenalAdvisorySticker.png")
+    $ArtWithText.Composite($ParenalAdvisorySticker, 100, 801, [ImageMagick.CompositeOperator]::Over)
+
     # Add mask
-    #$Mask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Mask.png")
     $IMask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/InverseMask.png")
-    #$Canvas.Composite($Mask, 50, 40, [ImageMagick.CompositeOperator]::Over)
-    #$ArtWithText.Composite($Mask, 50, 40, [ImageMagick.CompositeOperator]::Over)
     $ArtWithText.Composite($IMask, 50, 40, [ImageMagick.CompositeOperator]::CopyAlpha)
 
-    #$Canvas.Write("c:\temp\art.png")
-    $ArtWithText.Write("c:\temp\art.png")
-    Show-Image -Path "c:\temp\art.png" -Title $BandName
+    $Record = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/VinylRecord.png")
+
+    $Canvas.Composite($Record, 400, 61, [ImageMagick.CompositeOperator]::Over)
+    $Canvas.Composite($ArtWithText, 25, 10, [ImageMagick.CompositeOperator]::Over)
+    #$ArtWithText.Composite($Record, 250, 50, [ImageMagick.CompositeOperator]::DstOver)
+
+    $OutFile = (New-TemporaryFile).FullName
+    $Canvas.Write($OutFile)
+    #$ArtWithText.Write("c:\temp\art.png")
+    Show-Image -Path $OutFile -Title $BandName
 
     #$imageShowJob = Show-Image -Path $ArtFile.Fullname -title $bandName
 
