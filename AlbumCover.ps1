@@ -126,7 +126,10 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
  
     # Clean or regenerate Band name here.
     $bandName  = $bandName  -replace "List\Wof\W|\W\(.+\)",""
-    
+
+    # Convert band name to Title Case.
+    $bandName = (Get-Culture).TextInfo.ToTitleCase($bandName)
+
     Write-Host "Assigned band name: $bandName"
 
 
