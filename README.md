@@ -2,8 +2,9 @@
 Script to create mockup random album covers. This is a silly project used to learn about pull requests.
 
 
-# NuGet
+# Example
 ```
-Register-PackageSource -Location https://www.nuget.org/api/v2 -name nuget.org -Trusted -ProviderName NuGet
-Install-Package "Magick.NET-Q16-AnyCPU" -ProviderName NuGet
+PS> .\AlbumCover.ps1
 ```
+
+![Random Cover image](/Docs/Example.png)
