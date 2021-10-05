@@ -175,7 +175,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     # Place sticker
     $ArtWithText.Composite($sticker, $stickerX, $StickerY, [ImageMagick.CompositeOperator]::Over)
 
-    if ((Get-Random -Minimum 1 -Maximum 2) -eq 1) {
+    if ((Get-Random -Minimum 1 -Maximum 3) -eq 1) {
         $ParenalAdvisorySticker = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/ParenalAdvisorySticker.png")
         $ArtWithText.Composite($ParenalAdvisorySticker, 100, 801, [ImageMagick.CompositeOperator]::Over)
     }
