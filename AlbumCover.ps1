@@ -34,7 +34,8 @@ function Show-Image {
       $form.Add_Shown( { $form.Activate() } )
       $form.ShowDialog()
     }
-    Start-Job $ScriptBlock -Name "pictureViewer" -ArgumentList $path, $title
+    $null = Start-Job $ScriptBlock -Name "pictureViewer" -ArgumentList $path, $title
+    $null = Wait-Job -name "pictureViewer"
 }
 
 
@@ -141,8 +142,8 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
     # Magic
     # Create Canvas
-    $Canvas = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Canvas.png")
-
+    #$Canvas = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/Canvas.png")
+    $Canvas = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/wood.png")
 
     # Add text to coverart
     $ArtWithText = Write-TextOnImage -ImagePath $ArtFile.Fullname -Text $bandName
