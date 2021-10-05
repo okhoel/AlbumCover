@@ -67,22 +67,27 @@ function Write-TextOnImage {
         $Black = New-Object ImageMagick.MagickColor("#000")
         $Transparent = New-Object ImageMagick.MagickColor("Transparent")
 
-        $Setting = New-Object ImageMagick.MagickReadSettings
+        $font = (Get-Childitem "$PSScriptRoot/Assets/Fonts" | Get-Random).FullName
 
+        $Setting = New-Object ImageMagick.MagickReadSettings
         $Setting.TextGravity = "Center"
         $Setting.FillColor = $Fill
-        $Setting.StrokeColor = $Black
+        #$Setting.StrokeColor = $Black
         $Setting.BackgroundColor = $Transparent
-        $Setting.Width = 880
+        $Setting.Width = 860
         $Setting.Height = 120
-        $Setting.Font = 'Arial', 'Arial Black', 'Impact' | Get-Random
+        Write-Host -f green "Font: $font"
+        $Setting.Font = "$font"
+        #$Setting.Font = 'Arial', 'Arial Black', 'Impact' | Get-Random
     }
     
     process {
         $Art = New-Object ImageMagick.MagickImage($ImagePath)
         $caption = New-Object ImageMagick.MagickImage("caption:$Text", $Setting)
 
-        $Art.Composite($caption, 10, 20, [ImageMagick.CompositeOperator]::Over)
+        #$Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::Over)
+        $Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::Difference)
+        #$Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::BumpMap)
         #  [ImageMagick.CompositeOperator]::Screen
         #
         $Art
@@ -112,11 +117,14 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     
     $wikiRes = Invoke-RestMethod -uri $wikiUri
     $bandName = $wikiRes.Title
+    Write-Host "Wikipedia Article: $BandName"
 
     if ($bandName -match "olympics") {
+        Write-Host "Didn't like it, regenerating band name..."
         # So many "olympics" titles. And they doesn't make good band names.
         $wikiRes = Invoke-RestMethod -uri $wikiUri
         $bandName = $wikiRes.Title
+        Write-Host "Wikipedia Article: $BandName"
     }
 
     # Convert long names to 3 word names:
@@ -154,7 +162,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     # Load and Add effects
     $Wrinkles = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/OldCover.png")
     $ArtWithText.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
-
+    
     # Add Stickers
     $stickerPath = (Get-Childitem "$PSScriptRoot/Assets/Sticker_*" | Get-Random).Fullname
     $sticker = New-Object ImageMagick.MagickImage($stickerPath)
@@ -163,12 +171,14 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
     # Sticker position
     $stickerX = Get-Random -Minimum 780 -Maximum 820
-    $StickerY = (Get-Random -Minimum 100 -Maximum 190), (Get-Random -Minimum 760 -Maximum 820) | Get-Random
+    $StickerY = (Get-Random -Minimum 130 -Maximum 200), (Get-Random -Minimum 760 -Maximum 820) | Get-Random
     # Place sticker
     $ArtWithText.Composite($sticker, $stickerX, $StickerY, [ImageMagick.CompositeOperator]::Over)
 
-    $ParenalAdvisorySticker = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/ParenalAdvisorySticker.png")
-    $ArtWithText.Composite($ParenalAdvisorySticker, 100, 801, [ImageMagick.CompositeOperator]::Over)
+    if ((Get-Random -Minimum 1 -Maximum 2) -eq 1) {
+        $ParenalAdvisorySticker = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/ParenalAdvisorySticker.png")
+        $ArtWithText.Composite($ParenalAdvisorySticker, 100, 801, [ImageMagick.CompositeOperator]::Over)
+    }
 
     # Add mask
     $IMask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/InverseMask.png")
