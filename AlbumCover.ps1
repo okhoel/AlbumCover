@@ -9,10 +9,6 @@ function Show-Image {
     #cleanup
     get-job -Name "pictureViewer" -ErrorAction SilentlyContinue | Remove-Job -ErrorAction SilentlyContinue
   
-    $ScriptBlock = {
-      $path = $args[0]
-      $title = $args[1]
-  
       [void][reflection.assembly]::LoadWithPartialName("System.Windows.Forms")
       $file = (get-item $path)
       $img = [System.Drawing.Image]::Fromfile($file);
@@ -23,18 +19,39 @@ function Show-Image {
       $form.Width = $img.Size.Width;
       $form.Height =  $img.Size.Height;
       $pictureBox = new-object Windows.Forms.PictureBox
-      $pictureBox.Width =  $img.Size.Width;
-      $pictureBox.Height =  $img.Size.Height;
+      $pictureBox.Width =  $img.Size.Width + 80;
+      $pictureBox.Height =  $img.Size.Height + 80;
   
       $pictureBox.Image = $img;
   
-      $pictureBox.Add_click( { $form.Close() } )
-  
+      $pictureBox.Add_click( { $null = $form.Close() } )
+
+      $ButtonSize = 120, 26
+      $Button = New-Object System.Windows.Forms.Button
+      $Button.Location = New-Object System.Drawing.Size(($img.Size.Width - $ButtonSize[0] - 10), 10)
+      $Button.Size = New-Object System.Drawing.Size($ButtonSize[0], $ButtonSize[1])
+      $Button.Text = "Save Album Cover"
+
+      $Button.Add_click({
+        $OpenFileDialog = New-Object System.Windows.Forms.SaveFileDialog
+        $OpenFileDialog.initialDirectory = [environment]::GetFolderPath("MyPictures")
+        $OpenFileDialog.filename = "albumcover.png"
+        $OpenFileDialog.filter = "PNG Files (*.png)| *.png"
+        $SaveDialogResult = $OpenFileDialog.ShowDialog()
+        
+        $savePath = $OpenFileDialog.filename
+
+        if (($SaveDialogResult -ne "Cancel") -and ($savePath -ne '') -and ($savePath -ne $null)) {
+            Copy-Item $path $savePath
+        }
+      })
+    
+      $form.controls.add($Button)
       $form.controls.add($pictureBox)
       $form.Add_Shown( { $form.Activate() } )
       $form.ShowDialog()
-    }
-    $null = Start-Job $ScriptBlock -Name "pictureViewer" -ArgumentList $path, $title
+    
+    #$null = Start-Job $ScriptBlock -Name "pictureViewer" -ArgumentList $path, $title
     #$null = Wait-Job -name "pictureViewer"
 }
 
