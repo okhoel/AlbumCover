@@ -35,7 +35,7 @@ function Show-Image {
       $form.ShowDialog()
     }
     $null = Start-Job $ScriptBlock -Name "pictureViewer" -ArgumentList $path, $title
-    $null = Wait-Job -name "pictureViewer"
+    #$null = Wait-Job -name "pictureViewer"
 }
 
 
@@ -62,31 +62,66 @@ function Write-TextOnImage {
     )
     
     begin {
+
+    }
+    
+    process {
         $hex = "#ebe9e4", "#9bbdc7", "#ccc6cf" | get-random
-        $Fill = New-Object ImageMagick.MagickColor($hex)
-        $Black = New-Object ImageMagick.MagickColor("#000")
+        #$Fill = New-Object ImageMagick.MagickColor($hex)
+        $Black = New-Object ImageMagick.MagickColor("#0A0A0A")
+        $White = New-Object ImageMagick.MagickColor("#EDEBEA")
+
         $Transparent = New-Object ImageMagick.MagickColor("Transparent")
 
         $font = (Get-Childitem "$PSScriptRoot/Assets/Fonts" | Get-Random).FullName
 
+        $Art = New-Object ImageMagick.MagickImage($ImagePath)
+
+        # Try to find average color for text background.        
         $Setting = New-Object ImageMagick.MagickReadSettings
         $Setting.TextGravity = "Center"
-        $Setting.FillColor = $Fill
         #$Setting.StrokeColor = $Black
         $Setting.BackgroundColor = $Transparent
-        $Setting.Width = 860
+        $Setting.Width = 820
         $Setting.Height = 120
         Write-Host -f green "Font: $font"
         $Setting.Font = "$font"
-        #$Setting.Font = 'Arial', 'Arial Black', 'Impact' | Get-Random
-    }
-    
-    process {
-        $Art = New-Object ImageMagick.MagickImage($ImagePath)
+        $TestCaption = New-Object ImageMagick.MagickImage("caption:$Text", $Setting)
+        $TestCaption.Trim()
+        $ActualTextWidth = $TestCaption.Width
+        $ActualTextHeight = $TestCaption.Height
+        $Xposition = (900 - $ActualTextWidth) / 2
+        $GeoMetry = New-Object ImageMagick.MagickGeometry
+        $GeoMetry.X = $Xposition
+        $GeoMetry.Y = 40
+        $GeoMetry.Height = $ActualTextHeight
+        $GeoMetry.Width = $ActualTextWidth
+        # Test text
+
+        $BehindText = $Art.clone()
+        $BehindText.crop($GeoMetry)
+        #$BehindText.write("$PSScriptRoot/behind.png")
+        $brightness = $BehindText.Statistics().Composite().Mean
+        $BehindText.Resize(1,1)
+        $BehindText.Negate()
+        #$AverageBrightness = $BehindText.Statistics().Composite().Mean
+        #Write-host -f cyan "brightness-diff: $($brightness - $AverageBrightness)"
+        $AverageColorNegative = $BehindText.GetPixels().GetPixel(0,0).ToColor()
+        #$brightness = $BehindText.Statistics().Composite().Mean
+
+        if (($brightness -gt 30000) -and ($brightness -le 35000)) {
+            $AverageColor = $Black
+        }
+
+        $Setting.FillColor = $AverageColorNegative
+
         $caption = New-Object ImageMagick.MagickImage("caption:$Text", $Setting)
 
-        #$Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::Over)
-        $Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::Difference)
+
+        #$BehindText.write("$PSScriptRoot/behind.png")
+
+        $Art.Composite($caption, 40, 60, [ImageMagick.CompositeOperator]::Over)
+        #$Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::Difference)
         #$Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::BumpMap)
         #  [ImageMagick.CompositeOperator]::Screen
         #
@@ -171,7 +206,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
 
     # Sticker position
     $stickerX = Get-Random -Minimum 780 -Maximum 820
-    $StickerY = (Get-Random -Minimum 130 -Maximum 200), (Get-Random -Minimum 760 -Maximum 820) | Get-Random
+    $StickerY = (Get-Random -Minimum 190 -Maximum 250), (Get-Random -Minimum 760 -Maximum 820) | Get-Random
     # Place sticker
     $ArtWithText.Composite($sticker, $stickerX, $StickerY, [ImageMagick.CompositeOperator]::Over)
 
