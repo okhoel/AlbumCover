@@ -24,7 +24,7 @@ function Show-Image {
   
       $pictureBox.Image = $img;
   
-      $pictureBox.Add_click( { $form.Close() } )
+      $pictureBox.Add_click( { $null = $form.Close() } )
 
       $ButtonSize = 120, 26
       $Button = New-Object System.Windows.Forms.Button
@@ -37,11 +37,11 @@ function Show-Image {
         $OpenFileDialog.initialDirectory = [environment]::GetFolderPath("MyPictures")
         $OpenFileDialog.filename = "albumcover.png"
         $OpenFileDialog.filter = "PNG Files (*.png)| *.png"
-        $OpenFileDialog.ShowDialog()
+        $SaveDialogResult = $OpenFileDialog.ShowDialog()
         
         $savePath = $OpenFileDialog.filename
 
-        if (($savePath -ne "Cancel") -and ($savePath -ne '') -and ($savePath -ne $null)) {
+        if (($SaveDialogResult -ne "Cancel") -and ($savePath -ne '') -and ($savePath -ne $null)) {
             Copy-Item $path $savePath
         }
       })
