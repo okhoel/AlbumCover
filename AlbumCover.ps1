@@ -212,7 +212,7 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     $ArtWithText.Extent(1000,1000, [ImageMagick.Gravity]::Center, $Transparent)
 
     # Load and Add effects
-    $Wrinkles = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/OldCover.png")
+    $Wrinkles = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/OldCover2.png")
     $ArtWithText.Composite($Wrinkles, 50, 40, [ImageMagick.CompositeOperator]::Screen)
     
     # Add Stickers
