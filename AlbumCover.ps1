@@ -142,6 +142,7 @@ function Write-TextOnImage {
         #$Art.Composite($caption, 20, 40, [ImageMagick.CompositeOperator]::BumpMap)
         #  [ImageMagick.CompositeOperator]::Screen
         #
+
         $Art
     }
     
@@ -236,8 +237,14 @@ if ($PSVersionTable.PSEdition -ne 'Core') {
     $IMask = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/InverseMask.png")
     $ArtWithText.Composite($IMask, 50, 40, [ImageMagick.CompositeOperator]::CopyAlpha)
 
+    $Shadow= $ArtWithText.Clone()
+    $Shadow.Shadow(0,0,2,70, (New-Object ImageMagick.MagickColor("#0A0A0A")))
     $Record = New-Object ImageMagick.MagickImage("$PSScriptRoot/Assets/VinylRecord.png")
+    $RecordShadow = $Record.Clone()
+    $RecordShadow.Shadow(0,0,2,70, (New-Object ImageMagick.MagickColor("#0A0A0A")))
 
+    $Canvas.Composite($RecordShadow, 391, 61, [ImageMagick.CompositeOperator]::Over)
+    $Canvas.Composite($Shadow, 16, 10, [ImageMagick.CompositeOperator]::Over)
     $Canvas.Composite($Record, 400, 61, [ImageMagick.CompositeOperator]::Over)
     $Canvas.Composite($ArtWithText, 25, 10, [ImageMagick.CompositeOperator]::Over)
     #$ArtWithText.Composite($Record, 250, 50, [ImageMagick.CompositeOperator]::DstOver)
